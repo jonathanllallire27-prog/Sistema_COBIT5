@@ -47,6 +47,27 @@ const Finding = sequelize.define('Finding', {
   },
   closed_at: {
     type: DataTypes.DATE
+  },
+  audit_id: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: 'audits',
+      key: 'id'
+    }
+  },
+  control_id: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: 'controls',
+      key: 'id'
+    }
+  },
+  owner_id: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: 'users',
+      key: 'id'
+    }
   }
 }, {
   tableName: 'findings',

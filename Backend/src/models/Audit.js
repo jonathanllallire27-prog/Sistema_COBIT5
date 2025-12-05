@@ -35,6 +35,13 @@ const Audit = sequelize.define('Audit', {
       non_compliant: 0,
       not_applicable: null
     }
+  },
+  created_by: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: 'users',
+      key: 'id'
+    }
   }
 }, {
   tableName: 'audits',

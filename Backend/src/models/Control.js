@@ -36,6 +36,13 @@ const Control = sequelize.define('Control', {
       min: 0,
       max: 5
     }
+  },
+  process_id: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: 'cobit_processes',
+      key: 'id'
+    }
   }
 }, {
   tableName: 'controls',

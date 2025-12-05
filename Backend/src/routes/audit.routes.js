@@ -11,9 +11,9 @@ const { auth } = require('../middleware/auth');
 // Todas las rutas requieren autenticación
 router.use(auth);
 
+router.get('/dashboard', getAuditDashboard);
 router.get('/', getAudits);
 router.post('/', createAudit);
 router.get('/:id', getAuditById);
-router.get('/:id/dashboard', getAuditDashboard);
 
 module.exports = router;

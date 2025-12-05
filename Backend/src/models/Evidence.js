@@ -27,6 +27,20 @@ const Evidence = sequelize.define('Evidence', {
   },
   description: {
     type: DataTypes.TEXT
+  },
+  assessment_id: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: 'audit_assessments',
+      key: 'id'
+    }
+  },
+  uploaded_by: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: 'users',
+      key: 'id'
+    }
   }
 }, {
   tableName: 'evidences',

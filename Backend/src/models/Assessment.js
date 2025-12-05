@@ -26,6 +26,20 @@ const Assessment = sequelize.define('Assessment', {
   },
   evidence_summary: {
     type: DataTypes.TEXT
+  },
+  audit_id: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: 'audits',
+      key: 'id'
+    }
+  },
+  control_id: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: 'controls',
+      key: 'id'
+    }
   }
 }, {
   tableName: 'audit_assessments',

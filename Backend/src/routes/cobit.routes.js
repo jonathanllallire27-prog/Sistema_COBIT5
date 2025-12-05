@@ -11,10 +11,10 @@ router.get('/processes', getProcesses);
 // Obtener todos los controles
 router.get('/controls', getControls);
 
-// Obtener proceso por ID
-router.get('/processes/:id', getProcessById);
-
-// Obtener controles de un proceso específico
+// Obtener controles de un proceso específico (ANTES de :id)
 router.get('/process/:processId/controls', getControlsByProcess);
+
+// Obtener proceso por ID (DESPUÉS de las rutas específicas)
+router.get('/processes/:id', getProcessById);
 
 module.exports = router;

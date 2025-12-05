@@ -1,7 +1,7 @@
 // server.js - VERSIÓN CORREGIDA
 require('dotenv').config();
 const app = require('./src/app');
-const { sequelize } = require('./src/models');
+const { sequelize, syncModels } = require('./src/models');
 const loadCobitData = require('./src/utils/cobitLoader');
 
 const PORT = process.env.PORT || 5000;
@@ -11,8 +11,8 @@ const startServer = async () => {
     // Probar conexión a la base de datos
     await sequelize.authenticate();
     
-    // Sincronizar modelos
-    await sequelize.sync({ alter: true });
+    // Sincronizar modelos (esto también define las relaciones)
+    await syncModels(false);
     
     // Cargar datos iniciales de COBIT
     await loadCobitData();

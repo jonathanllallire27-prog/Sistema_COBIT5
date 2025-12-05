@@ -23,16 +23,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     const initializeAuth = () => {
-      const storedToken = authService.getToken();
-      const storedUser = authService.getCurrentUser();
-      
-      if (storedToken && storedUser) {
-        setToken(storedToken);
-        setUser(storedUser);
-        setIsAuthenticated(true);
+      try {
+        const storedToken = authService.getToken();
+        const storedUser = authService.getCurrentUser();
+        
+        if (storedToken && storedUser) {
+          setToken(storedToken);
+          setUser(storedUser);
+          setIsAuthenticated(true);
+        }
+        
+        setIsLoading(false);
+      } catch (error) {
+        setIsLoading(false);
       }
-      
-      setIsLoading(false);
     };
 
     initializeAuth();
