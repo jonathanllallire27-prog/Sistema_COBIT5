@@ -45,7 +45,13 @@ const AuditCard: React.FC<AuditCardProps> = ({
   };
 
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden hover:shadow-lg transition-shadow">
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={() => onView()}
+      onKeyDown={(e) => { if (e.key === 'Enter') onView(); }}
+      className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+    >
       {/* Header */}
       <div className="p-6 border-b border-gray-100 dark:border-gray-800">
         <div className="flex items-start justify-between mb-3">
@@ -115,7 +121,7 @@ const AuditCard: React.FC<AuditCardProps> = ({
             variant="ghost"
             size="sm"
             icon={Eye}
-            onClick={onView}
+            onClick={(e: any) => { e.stopPropagation(); onView(); }}
             className="h-9 w-9 p-0"
           />
           <div className="flex items-center gap-2">
@@ -123,14 +129,14 @@ const AuditCard: React.FC<AuditCardProps> = ({
               variant="ghost"
               size="sm"
               icon={Edit}
-              onClick={onEdit}
+              onClick={(e: any) => { e.stopPropagation(); onEdit(); }}
               className="h-9 w-9 p-0"
             />
             <Button
               variant="ghost"
               size="sm"
               icon={Trash2}
-              onClick={onDelete}
+              onClick={(e: any) => { e.stopPropagation(); onDelete(); }}
               className="h-9 w-9 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
             />
           </div>

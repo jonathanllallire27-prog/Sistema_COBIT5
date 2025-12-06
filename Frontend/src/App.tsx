@@ -7,6 +7,9 @@ import Dashboard from '@/pages/Dashboard';
 import Audits from '@/pages/Audits';
 import AuditDetail from '@/pages/AuditDetail';
 import Execution from '@/pages/Execution';
+import Findings from '@/pages/Findings';
+import FindingNew from '@/pages/FindingNew';
+import FindingEdit from '@/pages/FindingEdit';
 import Reports from '@/pages/Reports';
 import CobitProcesses from '@/pages/CobitProcesses';
 import Users from '@/pages/Users';
@@ -51,7 +54,12 @@ const App: React.FC = () => {
         <Route path="audits" element={<Audits />} />
         <Route path="audits/:id" element={<AuditDetail />} />
         <Route path="execution" element={<Execution />} />
+        <Route path="execution/:id" element={<Execution />} />
         <Route path="reports" element={<Reports />} />
+        <Route path="reports/audit/:auditId" element={<Reports />} />
+        <Route path="audits/:id/findings" element={<Findings />} />
+        <Route path="audits/:id/findings/new" element={<FindingNew />} />
+        <Route path="audits/:id/findings/:findingId/edit" element={<FindingEdit />} />
         <Route path="cobit" element={<CobitProcesses />} />
         <Route 
           path="users" 

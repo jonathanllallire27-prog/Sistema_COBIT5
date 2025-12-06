@@ -50,4 +50,23 @@ export const auditService = {
     const response = await api.post(`/findings/audit/${auditId}`, data);
     return response.data.data;
   },
+
+  async uploadFindingEvidence(findingId: number, file: File, description?: string) {
+    const form = new FormData();
+    form.append('file', file);
+    if (description) form.append('description', description);
+
+    const response = await api.post(`/findings/${findingId}/evidence`, form, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+
+    return response.data.data;
+  },
+  async updateFinding(findingId: number, data: Partial<Finding>): Promise<Finding> {
+    const response = await api.put(`/findings/${findingId}`, data);
+    return response.data.data;
+  },
+  async deleteFinding(findingId: number): Promise<void> {
+    await api.delete(`/findings/${findingId}`);
+  },
 };

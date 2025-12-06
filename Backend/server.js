@@ -22,6 +22,14 @@ const startServer = async () => {
       console.clear();
       console.log('\n✅ Backend funcionando correctamente en http://localhost:' + PORT + '\n');
     });
+    // Start background worker for report jobs
+    try {
+      const { startWorker } = require('./src/utils/reportWorker');
+      startWorker();
+      console.log('🔁 Report worker started');
+    } catch (e) {
+      console.warn('Could not start report worker:', e.message);
+    }
     
   } catch (error) {
     console.error('❌ Error al iniciar el servidor:', error);

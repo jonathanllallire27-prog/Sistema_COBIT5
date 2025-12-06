@@ -29,13 +29,6 @@ const createAudit = async (req, res) => {
       
       await Assessment.bulkCreate(assessments);
     }
-    
-    res.status(201).json({
-      success: true,
-      message: 'Auditoría creada exitosamente',
-      data: audit
-    });
-    
   } catch (error) {
     console.error('Error creando auditoría:', error);
     res.status(500).json({
@@ -294,11 +287,73 @@ const getAuditDashboard = async (req, res) => {
   }
 };
 
+// Exported functions will be assigned after all handlers are defined
+
+// Obtener dashboard global de auditorías
+const getGlobalDashboard = async (req, res) => {
+  try {
+    // Obtener todas las auditorías con sus evaluaciones y hallazgos
+    const audits = await Audit.findAll({
+      include: [
+        { model: Assessment },
+        { model: Finding }
+      ]
+    });
+
+    const totalAudits = audits.length;
+    const activeAudits = audits.filter(a => a.status === 'in_progress' || a.status === 'planned').length;
+
+    // Calcular compliance por auditoría y luego promedio
+    const complianceRates = audits.map(a => {
+      const totalAssessments = (a.Assessments || []).length;
+      const compliantAssessments = (a.Assessments || []).filter(as => as.compliance === 'compliant').length;
+      return totalAssessments > 0 ? (compliantAssessments / totalAssessments * 100) : null;
+    }).filter(x => x !== null);
+
+    const complianceRate = complianceRates.length > 0 ? (complianceRates.reduce((s, v) => s + Number(v), 0) / complianceRates.length) : 0;
+
+    // Agregar hallazgos globales
+    const findings = audits.reduce((acc, a) => acc.concat(a.Findings || []), []);
+    const totalFindings = findings.length;
+    const findingsBySeverity = findings.reduce((acc, f) => {
+      acc[f.severity] = (acc[f.severity] || 0) + 1;
+      return acc;
+    }, {});
+
+    // Promedio de scores global
+    const scores = audits.reduce((acc, a) => acc.concat((a.Assessments || []).map(as => as.score).filter(s => s !== null && s !== undefined)), []);
+    const averageScore = scores.length > 0 ? (scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
+
+    const closedFindings = findings.filter(f => f.status === 'closed').length;
+    const openFindings = totalFindings - closedFindings;
+
+    res.json({
+      success: true,
+      data: {
+        metrics: {
+          totalAudits,
+          activeAudits,
+          complianceRate: Number(Number(complianceRate).toFixed(2)),
+          totalFindings,
+          openFindings,
+          findingsBySeverity,
+          averageScore: Number(Number(averageScore).toFixed(2))
+        }
+      }
+    });
+
+  } catch (error) {
+    console.error('Error obteniendo dashboard global:', error);
+    res.status(500).json({ success: false, message: 'Error al obtener dashboard global' });
+  }
+};
+
 module.exports = {
   createAudit,
   getAudits,
   getAuditById,
   updateAudit,
   deleteAudit,
-  getAuditDashboard
+  getAuditDashboard,
+  getGlobalDashboard
 };

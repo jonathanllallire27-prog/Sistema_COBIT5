@@ -35,6 +35,14 @@ const Evidence = sequelize.define('Evidence', {
       key: 'id'
     }
   },
+  finding_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: 'findings',
+      key: 'id'
+    }
+  },
   uploaded_by: {
     type: DataTypes.INTEGER,
     references: {

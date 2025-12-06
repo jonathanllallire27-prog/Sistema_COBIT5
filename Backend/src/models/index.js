@@ -8,6 +8,7 @@ const Finding = require('./Finding');
 const Assessment = require('./Assessment');
 const Evidence = require('./Evidence');
 const CobitProcess = require('./CobitProcess');
+const ReportJob = require('./ReportJob');
 
 // Definir relaciones
 const defineRelationships = () => {
@@ -43,9 +44,15 @@ const defineRelationships = () => {
   Assessment.hasMany(Evidence, { foreignKey: 'assessment_id' });
   Evidence.belongsTo(Assessment, { foreignKey: 'assessment_id' });
 
+  // Hallazgo puede tener múltiples evidencias
+  Finding.hasMany(Evidence, { foreignKey: 'finding_id' });
+  Evidence.belongsTo(Finding, { foreignKey: 'finding_id' });
+
   // Evidencia es subida por un usuario
   User.hasMany(Evidence, { foreignKey: 'uploaded_by' });
   Evidence.belongsTo(User, { foreignKey: 'uploaded_by', as: 'uploader' });
+  // Report jobs table
+  // No special relationships required currently
 };
 
 // Sincronizar modelos
@@ -68,5 +75,6 @@ module.exports = {
   Assessment,
   Evidence,
   CobitProcess,
+  ReportJob,
   syncModels
 };

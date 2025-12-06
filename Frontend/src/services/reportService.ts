@@ -2,7 +2,11 @@ import api from './api';
 
 export const reportService = {
   async generateAuditReport(auditId: number, format: 'pdf' | 'excel' | 'word') {
-    const response = await api.get(`/reports/audit/${auditId}/${format}`, {
+    // Backend currently supports PDF at /reports/audit/:auditId/pdf
+    if (format !== 'pdf') {
+      throw new Error('Formato no soportado en el servidor');
+    }
+    const response = await api.get(`/reports/audit/${auditId}/pdf`, {
       responseType: 'blob',
     });
     return response.data;
@@ -27,4 +31,22 @@ export const reportService = {
     const response = await api.get(`/reports/audit/${auditId}/json`);
     return response.data.data;
   },
+  async generateAllReports() {
+    const response = await api.post('/reports/generate-all');
+    return response.data.data;
+  }
+  ,
+  async generateFilteredReports(filters: { dateFrom?: string; dateTo?: string; status?: string; creatorId?: number; all?: boolean }) {
+    const response = await api.post('/reports/generate', filters);
+    return response.data.data;
+  }
+  ,
+  async submitReportJob(filters: { dateFrom?: string; dateTo?: string; status?: string; creatorId?: number; all?: boolean }) {
+    const response = await api.post('/reports/submit', filters);
+    return response.data.data;
+  },
+  async getJobStatus(jobId: number) {
+    const response = await api.get(`/reports/jobs/${jobId}`);
+    return response.data.data;
+  }
 };

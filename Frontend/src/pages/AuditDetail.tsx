@@ -11,6 +11,15 @@ const AuditDetail: React.FC = () => {
   const navigate = useNavigate();
   const { audit, findings, loading } = useAudit(id ? parseInt(id) : undefined);
 
+  const goToAudits = () => {
+    try {
+      if (window.history.length > 1) navigate(-1);
+      else navigate('/audits');
+    } catch {
+      navigate('/audits');
+    }
+  };
+
   if (loading) {
     return <LoadingSpinner />;
   }
@@ -18,14 +27,14 @@ const AuditDetail: React.FC = () => {
   if (!audit) {
     return (
       <div className="text-center py-12">
-        <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-          Auditoría no encontrada
-        </h3>
-        <Button onClick={() => navigate('/audits')} variant="outline">
-          Volver a Auditorías
-        </Button>
-      </div>
+          <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+            Auditoría no encontrada
+          </h3>
+          <Button onClick={goToAudits} variant="outline">
+            Volver a Auditorías
+          </Button>
+        </div>
     );
   }
 

@@ -54,6 +54,8 @@ const createFinding = async (req, res) => {
   }
 };
 
+// (will export after all handlers are defined)
+
 // Obtener hallazgos de una auditoría
 const getFindingsByAudit = async (req, res) => {
   try {
@@ -175,9 +177,58 @@ const deleteFinding = async (req, res) => {
   }
 };
 
+// Export functions after all handlers are defined
+
+// Agregar evidencia a un hallazgo
+const addFindingEvidence = async (req, res) => {
+  try {
+    const { findingId } = req.params;
+
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: 'No se proporcionó archivo'
+      });
+    }
+
+    const finding = await Finding.findByPk(findingId);
+
+    if (!finding) {
+      return res.status(404).json({
+        success: false,
+        message: 'Hallazgo no encontrado'
+      });
+    }
+
+    const evidence = await require('../models/Evidence').create({
+      finding_id: findingId,
+      filename: req.file.originalname,
+      filepath: req.file.path,
+      filetype: req.file.mimetype,
+      filesize: req.file.size,
+      uploaded_by: req.user.id,
+      description: req.body.description || ''
+    });
+
+    res.status(201).json({
+      success: true,
+      message: 'Evidencia agregada al hallazgo exitosamente',
+      data: evidence
+    });
+
+  } catch (error) {
+    console.error('Error agregando evidencia al hallazgo:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error al agregar evidencia'
+    });
+  }
+};
+
 module.exports = {
   createFinding,
   getFindingsByAudit,
   updateFinding,
-  deleteFinding
+  deleteFinding,
+  addFindingEvidence
 };

@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, FileText, AlertCircle, CheckCircle } from 'lucide-react';
 import { useAudit } from '@/hooks/useAudit';
 import ControlList from '@/components/execution/ControlList';
 import Button from '@/components/common/Button';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
+import { auditService } from '@/services/auditService';
+import { Audit } from '@/types';
 
 const Execution: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -19,10 +21,86 @@ const Execution: React.FC = () => {
     refetch,
   } = useAudit(id ? parseInt(id) : undefined);
 
+  const goToAudits = () => {
+    try {
+      if (window.history.length > 1) navigate(-1);
+      else navigate('/audits');
+    } catch {
+      navigate('/audits');
+    }
+  };
+
+  // If no `id` param -> list view of available executions
+  const [auditsList, setAuditsList] = useState<Audit[]>([]);
+  const [listLoading, setListLoading] = useState(false);
+
+  useEffect(() => {
+    const loadList = async () => {
+      if (id) return;
+      setListLoading(true);
+      try {
+        const all = await auditService.getAll();
+        // Show planned and in_progress audits as available executions
+        const available = all.filter(a => ['planned', 'in_progress'].includes(a.status));
+        setAuditsList(available);
+      } catch (err) {
+        console.error('Error cargando lista de auditorías:', err);
+      } finally {
+        setListLoading(false);
+      }
+    };
+    loadList();
+  }, [id]);
+
   const [activeTab, setActiveTab] = useState<'controls' | 'findings'>('controls');
 
   if (loading) {
     return <LoadingSpinner />;
+  }
+  // If no id -> show list of available executions
+  if (!id) {
+    if (listLoading) return <LoadingSpinner />;
+
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Ejecuciones</h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Auditorías planificadas y en progreso disponibles para ejecutar</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <Button variant="outline" onClick={goToAudits}>Volver a Auditorías</Button>
+            <Button variant="primary" onClick={() => { navigate('/audits'); }}>Gestionar Auditorías</Button>
+          </div>
+        </div>
+
+        {auditsList.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {auditsList.map(a => (
+              <div key={a.id} className="p-4 border border-gray-200 dark:border-gray-800 rounded-lg bg-white dark:bg-gray-900">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h3 className="font-semibold text-gray-900 dark:text-white">{a.name}</h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{a.description}</p>
+                    <p className="text-xs text-gray-500 mt-2">Estado: {a.status}</p>
+                  </div>
+                  <div className="flex flex-col items-end gap-2">
+                    <Button variant="ghost" onClick={() => navigate(`/audits/${a.id}`)}>Ver</Button>
+                    <Button variant="primary" onClick={() => navigate(`/execution/${a.id}`)}>Entrar</Button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <AlertCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No hay ejecuciones disponibles</h3>
+            <p className="text-gray-500 dark:text-gray-400">Puedes planificar una nueva auditoría en la sección de Auditorías.</p>
+          </div>
+        )}
+      </div>
+    );
   }
 
   if (error || !audit) {
@@ -32,7 +110,7 @@ const Execution: React.FC = () => {
         <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
           {error || 'Auditoría no encontrada'}
         </h3>
-        <Button onClick={() => navigate('/audits')} variant="outline">
+        <Button onClick={goToAudits} variant="outline">
           Volver a Auditorías
         </Button>
       </div>
@@ -55,7 +133,7 @@ const Execution: React.FC = () => {
         <div className="flex items-center gap-4">
           <Button
             variant="ghost"
-            onClick={() => navigate('/audits')}
+            onClick={goToAudits}
             icon={ArrowLeft}
           >
             Volver
