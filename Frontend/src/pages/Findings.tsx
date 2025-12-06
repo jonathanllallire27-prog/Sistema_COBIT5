@@ -2,6 +2,7 @@ import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AlertCircle, FileText } from 'lucide-react';
 import { useAudit } from '@/hooks/useAudit';
+import { auditService } from '@/services/auditService';
 import Button from '@/components/common/Button';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 

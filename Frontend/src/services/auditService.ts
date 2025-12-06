@@ -69,4 +69,8 @@ export const auditService = {
   async deleteFinding(findingId: number): Promise<void> {
     await api.delete(`/findings/${findingId}`);
   },
+  async generateAssessments(auditId: number): Promise<{ createdCount: number }> {
+    const response = await api.post(`/audits/${auditId}/generate-assessments`);
+    return response.data;
+  },
 };

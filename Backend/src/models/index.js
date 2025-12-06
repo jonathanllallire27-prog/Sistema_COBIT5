@@ -55,10 +55,12 @@ const defineRelationships = () => {
   // No special relationships required currently
 };
 
+// Definir relaciones inmediatamente al importar
+defineRelationships();
+
 // Sincronizar modelos
 const syncModels = async (force = false) => {
   try {
-    defineRelationships();
     await sequelize.sync({ force });
     console.log('Modelos sincronizados correctamente.');
   } catch (error) {

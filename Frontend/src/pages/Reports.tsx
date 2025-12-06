@@ -20,11 +20,14 @@ type Metrics = {
 };
 
 const Reports: React.FC = () => {
+  const { auditId } = useParams<{ auditId?: string }>();
+  
   const [filters, setFilters] = useState({
     dateRange: '2024-09-05:2024-10-07',
     auditType: 'all',
     controlObjective: 'all',
     search: '',
+    creatorId: 'all',
   });
 
   const handleFilterChange = (newFilters: typeof filters) => {
@@ -42,16 +45,16 @@ const Reports: React.FC = () => {
   const handleGenerateReport = async () => {
     setLoading(true);
     try {
-      if (auditId) {
+      if (auditId && auditId.trim()) {
         // Obtener datos del reporte por auditoría
         const data = await reportService.getReportData(parseInt(auditId));
         setMetrics({
-          totalAssessments: data.metrics?.totalAssessments,
-          completedAssessments: data.metrics?.completedAssessments,
-          complianceRate: data.metrics?.complianceRate,
-          totalFindings: data.metrics?.totalFindings,
-          findingsBySeverity: data.metrics?.findingsBySeverity,
-          assessmentsByDomain: data.metrics?.assessmentsByDomain,
+          totalAssessments: data?.metrics?.totalAssessments,
+          completedAssessments: data?.metrics?.completedAssessments,
+          complianceRate: data?.metrics?.complianceRate,
+          totalFindings: data?.metrics?.totalFindings,
+          findingsBySeverity: data?.metrics?.findingsBySeverity,
+          assessmentsByDomain: data?.metrics?.assessmentsByDomain,
         } as any);
       } else {
         // Obtener métricas globales
@@ -78,10 +81,8 @@ const Reports: React.FC = () => {
     })();
   }, []);
 
-  const { auditId } = useParams<{ auditId?: string }>();
-
   const handleDownloadAuditPdf = async () => {
-    if (!auditId) return;
+    if (!auditId || !auditId.trim()) return;
     try {
       const blob = await reportService.generateAuditReport(parseInt(auditId), 'pdf');
       const downloadUrl = window.URL.createObjectURL(new Blob([blob]));
@@ -100,7 +101,7 @@ const Reports: React.FC = () => {
 
   useEffect(() => {
     // Si viene auditId por ruta, auto-cargar sus métricas
-    if (auditId) {
+    if (auditId && auditId.trim()) {
       handleGenerateReport();
     } else {
       // cargar métricas globales iniciales

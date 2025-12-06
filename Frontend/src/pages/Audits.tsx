@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus } from 'lucide-react';
 import AuditCard from '@/components/audits/AuditCard';
+import AuditList from '@/components/audits/AuditList';
 import AuditForm from '@/components/audits/AuditForm';
 import AuditFilters from '@/components/audits/AuditFilters';
 import { auditService } from '@/services/auditService';
@@ -117,20 +118,12 @@ const Audits: React.FC = () => {
       />
 
       {/* Lista de auditorías */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredAudits.map((audit) => (
-          <AuditCard
-            key={audit.id}
-            audit={audit}
-            onView={() => navigate(`/audits/${audit.id}`)}
-            onEdit={() => {
-              setEditingAudit(audit);
-              setShowForm(true);
-            }}
-            onDelete={() => handleDeleteAudit(audit.id)}
-          />
-        ))}
-      </div>
+      <AuditList
+        audits={filteredAudits}
+        onView={(id) => navigate(`/audits/${id}`)}
+        onEdit={(a) => { setEditingAudit(a); setShowForm(true); }}
+        onDelete={(id) => handleDeleteAudit(id)}
+      />
 
       {filteredAudits.length === 0 && (
         <div className="text-center py-12">

@@ -15,20 +15,37 @@ const createAudit = async (req, res) => {
       status: 'planned'
     });
     
-    // Si hay procesos en el scope, crear evaluaciones para sus controles
+    // Crear evaluaciones para los controles
+    let createdAssessments = 0;
+    let controls;
+    
     if (scope_processes && scope_processes.length > 0) {
-      const controls = await Control.findAll({
+      // Si hay procesos en el scope, obtener sus controles
+      controls = await Control.findAll({
         where: { process_id: scope_processes }
       });
-      
+    } else {
+      // Si no hay procesos, obtener TODOS los controles disponibles
+      controls = await Control.findAll();
+    }
+    
+    if (controls.length > 0) {
       const assessments = controls.map(control => ({
         audit_id: audit.id,
         control_id: control.id,
         status: 'pending'
       }));
       
-      await Assessment.bulkCreate(assessments);
+      const resAss = await Assessment.bulkCreate(assessments);
+      createdAssessments = Array.isArray(resAss) ? resAss.length : 0;
     }
+
+    // Respond with created audit and created assessments count
+    return res.status(201).json({
+      success: true,
+      data: audit,
+      createdAssessments
+    });
   } catch (error) {
     console.error('Error creando auditoría:', error);
     res.status(500).json({
@@ -357,3 +374,45 @@ module.exports = {
   getAuditDashboard,
   getGlobalDashboard
 };
+
+// Generar evaluaciones faltantes para una auditoría (por procesos en scope o todos los controles)
+const generateAssessmentsForAudit = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const audit = await Audit.findByPk(id);
+    if (!audit) {
+      return res.status(404).json({ success: false, message: 'Auditoría no encontrada' });
+    }
+
+    const scope = audit.scope_processes || [];
+    let controls;
+    
+    if (scope.length > 0) {
+      // Si hay procesos en el scope, obtener sus controles
+      controls = await Control.findAll({ where: { process_id: scope } });
+    } else {
+      // Si no hay procesos, obtener TODOS los controles disponibles
+      controls = await Control.findAll();
+    }
+
+    // find existing assessments for this audit
+    const existing = await Assessment.findAll({ where: { audit_id: audit.id } });
+    const existingControlIds = new Set(existing.map(e => e.control_id));
+
+    const toCreate = controls.filter(c => !existingControlIds.has(c.id)).map(c => ({
+      audit_id: audit.id,
+      control_id: c.id,
+      status: 'pending'
+    }));
+
+    const created = toCreate.length > 0 ? await Assessment.bulkCreate(toCreate) : [];
+
+    return res.json({ success: true, createdCount: Array.isArray(created) ? created.length : 0 });
+  } catch (error) {
+    console.error('Error generating assessments:', error);
+    return res.status(500).json({ success: false, message: 'Error generando evaluaciones' });
+  }
+};
+
+// export helper
+module.exports.generateAssessmentsForAudit = generateAssessmentsForAudit;

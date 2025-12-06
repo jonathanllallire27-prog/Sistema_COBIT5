@@ -1,4 +1,4 @@
-const { Assessment, Control, Evidence } = require('../models');
+const { Assessment, Control, Evidence, CobitProcess } = require('../models');
 
 // Obtener evaluaciones de una auditoría
 const getAssessmentsByAudit = async (req, res) => {
@@ -10,7 +10,7 @@ const getAssessmentsByAudit = async (req, res) => {
       include: [
         {
           model: Control,
-          include: ['CobitProcess']
+          include: [CobitProcess]
         },
         {
           model: Evidence

@@ -76,7 +76,7 @@ const AuditForm: React.FC<AuditFormProps> = ({ audit, onSubmit, onClose }) => {
   };
 
   const onSubmitForm = (data: AuditFormData) => {
-    onSubmit(data);
+    return onSubmit(data);
   };
 
   const groupedProcesses = processes.reduce((acc, process) => {
