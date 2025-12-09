@@ -165,7 +165,45 @@ const updateAudit = async (req, res) => {
       });
     }
     
+    // Si se actualiza scope_processes, generar evaluaciones automáticamente
+    const oldScope = audit.scope_processes || [];
+    const newScope = updates.scope_processes || [];
+    
     await audit.update(updates);
+    
+    // Si cambió el scope, crear evaluaciones para los nuevos procesos
+    if (JSON.stringify(oldScope) !== JSON.stringify(newScope)) {
+      let controls;
+      
+      if (newScope.length > 0) {
+        // Obtener controles de los procesos en el scope
+        controls = await Control.findAll({
+          where: { process_id: newScope }
+        });
+      } else {
+        // Si el scope está vacío, obtener TODOS los controles
+        controls = await Control.findAll();
+      }
+      
+      // Obtener evaluaciones existentes
+      const existing = await Assessment.findAll({
+        where: { audit_id: audit.id }
+      });
+      const existingControlIds = new Set(existing.map(e => e.control_id));
+      
+      // Crear evaluaciones solo para controles nuevos
+      const toCreate = controls
+        .filter(c => !existingControlIds.has(c.id))
+        .map(c => ({
+          audit_id: audit.id,
+          control_id: c.id,
+          status: 'pending'
+        }));
+      
+      if (toCreate.length > 0) {
+        await Assessment.bulkCreate(toCreate);
+      }
+    }
     
     res.json({
       success: true,
