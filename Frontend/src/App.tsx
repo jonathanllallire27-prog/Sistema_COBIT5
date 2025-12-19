@@ -1,8 +1,9 @@
-import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import Layout from '@/components/layout/Layout';
 import Login from '@/pages/Login';
+import Register from '@/pages/Register';
+import ForgotPassword from '@/pages/ForgotPassword';
 import Dashboard from '@/pages/Dashboard';
 import Audits from '@/pages/Audits';
 import AuditDetail from '@/pages/AuditDetail';
@@ -17,9 +18,9 @@ import Settings from '@/pages/Settings';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 
 // Componente para rutas protegidas
-const ProtectedRoute: React.FC<{ children: React.ReactNode; allowedRoles?: string[] }> = ({ 
-  children, 
-  allowedRoles 
+const ProtectedRoute: React.FC<{ children: React.ReactNode; allowedRoles?: string[] }> = ({
+  children,
+  allowedRoles
 }) => {
   const { isAuthenticated, user, isLoading } = useAuth();
 
@@ -41,9 +42,11 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode; allowedRoles?: strin
 const App: React.FC = () => {
   return (
     <Routes>
-      {/* Ruta pública */}
+      {/* Rutas públicas */}
       <Route path="/login" element={<Login />} />
-      
+      <Route path="/register" element={<Register />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+
       {/* Rutas protegidas */}
       <Route path="/" element={
         <ProtectedRoute>
@@ -61,17 +64,17 @@ const App: React.FC = () => {
         <Route path="audits/:id/findings/new" element={<FindingNew />} />
         <Route path="audits/:id/findings/:findingId/edit" element={<FindingEdit />} />
         <Route path="cobit" element={<CobitProcesses />} />
-        <Route 
-          path="users" 
+        <Route
+          path="users"
           element={
             <ProtectedRoute allowedRoles={['admin']}>
               <Users />
             </ProtectedRoute>
-          } 
+          }
         />
         <Route path="settings" element={<Settings />} />
       </Route>
-      
+
       {/* Ruta 404 */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
